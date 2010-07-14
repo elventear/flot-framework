@@ -15,23 +15,58 @@ sc_require('core.js');
 Flot.GraphView = SC.View.extend(
 /** @scope Flot.GraphView.prototype */ {
 	series: null,
-	data: null ,
-	options: null ,
+	data: null,
+	options: null,
+	title: null,
 	debugInConsole: true ,
 	render: function(context, firstTime) {
-		sc_super();
+		var title = this.get('title'),
+			frame = this.get('frame');
 		
-		if(this.get('layer') && this.get('isVisibleInWindow')) {
-			if((this.get('frame').width > 0) && (this.get('frame').height > 0)) {
+		if (!SC.none(title)) {
+			context = context.begin().
+				addClass('flot-graphview-title').push(title).end();
+			context = context.begin().
+				addClass('flot-graphview-graph').end();
+		}
+		
+		this.set('layerNeedsUpdate', YES);
+		sc_super();
+	},
+	updateLayer: function() {
+		
+		var title = this.get('title'),
+			frame = this.get('frame'),
+			layer, height, width;
+		
+		width = frame.width;
+		if (SC.none(title)) {
+			layer = this.get('layer');
+			height = frame.height;
+		} else {
+			layer = this.$('div.flot-graphview-graph')[0];
+			var titleLayer = this.$('div.flot-graphview-title')[0],
+				parentLayer = this.get('layer');
+			
+			height = frame.height-titleLayer.clientHeight;
+			if (height < 0) height = 0;
+			layer.style.height = height+'px';
+			
+			width = parentLayer.clientWidth;
+			layer.style.width = width+'px';
+		}
+		
+		if(layer && this.get('isVisibleInWindow')) {
+			if((width > 0) && (height > 0)) {
 				var data = this.get('data'),
 				series = this.get('series');
 				
 				if (!SC.empty(data)) {
-					Flot.plot(this.get('layer'), data.toArray(),
+					Flot.plot(layer, data.toArray(),
 						this.get('options'));
 					if (this.debugInConsole) console.log('render data');
 				} else if (!SC.empty(series)) {
-					Flot.plot(this.get('layer'), series.toArray(),
+					Flot.plot(layer, series.toArray(),
 						this.get('options'));
 					if (this.debugInConsole) console.log('render series');
 				} else {
@@ -40,6 +75,10 @@ Flot.GraphView = SC.View.extend(
 			}
 		}
 	},
+	titleDidChange: function() {
+		this.setLayerNeedsUpdate() ;
+		if (this.debugInConsole) console.log('title changed');
+	}.observes('.title'),
 	plotDataDidChange: function() {
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('data changed');

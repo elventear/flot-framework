@@ -20,38 +20,35 @@ Flot.GraphView = SC.View.extend(
 	title: null,
 	debugInConsole: true ,
 	render: function(context, firstTime) {
-		var title = this.get('title'),
-			frame = this.get('frame');
 		
-		if (!SC.none(title)) {
 			context = context.begin().
-				addClass('flot-graphview-title').push(title).end();
+				addClass('flot-graphview-title').end();
 			context = context.begin().
 				addClass('flot-graphview-graph').end();
-		}
 		
 		this.set('layerNeedsUpdate', YES);
 		sc_super();
 	},
 	updateLayer: function() {
-		
 		var title = this.get('title'),
 			frame = this.get('frame'),
 			layer, height, width;
 		
 		width = frame.width;
-		if (SC.none(title)) {
-			layer = this.get('layer');
-			height = frame.height;
-		} else {
-			layer = this.$('div.flot-graphview-graph')[0];
-			var titleLayer = this.$('div.flot-graphview-title')[0],
-				parentLayer = this.get('layer');
+		
+		layer = this.$('div.flot-graphview-graph')[0];
+		var titleLayer = this.$('div.flot-graphview-title')[0],
+			parentLayer = this.get('layer');
 			
+		if (titleLayer && title) {
+			titleLayer.innerText = title;
+		}
+		
+		if (layer && titleLayer) {
 			height = frame.height-titleLayer.clientHeight;
 			if (height < 0) height = 0;
 			layer.style.height = height+'px';
-			
+		
 			width = parentLayer.clientWidth;
 			layer.style.width = width+'px';
 		}
@@ -112,8 +109,7 @@ Flot.GraphView = SC.View.extend(
 			this.set('layerNeedsUpdate', YES);
 			if (this.debugInConsole) console.log('need update') ;
 		});
-		
-	},
+	}.observes('layer'),
 	viewDidResize: function() {
 		sc_super();
 		this.setLayerNeedsUpdate() ;

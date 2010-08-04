@@ -18,53 +18,93 @@ Flot.GraphView = SC.View.extend(
 	data: null,
 	options: null,
 	title: null,
-	debugInConsole: true ,
+	debugInConsole: true,
+	titleLayer: null,
+	graphLayer: null,
+	legendLayer: null,
+	legendHeightPx: 50,
+	outsideLegend: false,
+	init: function () {
+		sc_super();
+		var options = this.get('options'),
+			legendOptions;
+		
+		if (!options) options = {};
+		if (this.get('outsideLegend')) {
+			legendOptions = options['legend'];
+			if (!legendOptions) {
+				legendOptions = {};
+				options['legend'] = legendOptions;
+			}
+			legendOptions['show'] = true;
+			legendOptions['container'] = null;
+		}
+			
+			
+	},
 	render: function(context, firstTime) {
-		
-			context = context.begin().
-				addClass('flot-graphview-title').end();
-			context = context.begin().
-				addClass('flot-graphview-graph').end();
-		
+		context.
+			begin().addClass('flot-graphview-title').end().
+			begin().addClass('flot-graphview-graph').end().
+			begin().addClass('flot-graphview-legend').end();
 		this.set('layerNeedsUpdate', YES);
 		sc_super();
 	},
 	updateLayer: function() {
 		var title = this.get('title'),
 			frame = this.get('frame'),
-			layer, height, width;
+			graphLayer = this.get('graphLayer'), 
+			titleLayer = this.get('titleLayer'),
+			legendLayer = this.get('legendLayer'),
+			parentLayer = this.get('layer'),
+			options = this.get('options'),
+			width = frame.width,
+			height, legendOptions;
 		
-		width = frame.width;
+		if (!graphLayer) {
+			graphLayer = this.$('div.flot-graphview-graph')[0];
+			this.set('graphLayer', graphLayer);
+		}
 		
-		layer = this.$('div.flot-graphview-graph')[0];
-		var titleLayer = this.$('div.flot-graphview-title')[0],
-			parentLayer = this.get('layer');
+		if (!titleLayer) {
+			titleLayer = this.$('div.flot-graphview-title')[0];
+			this.set('titleLayer', titleLayer);
+		}
+		
+		if (!legendLayer) {
+			legendLayer = this.$('div.flot-graphview-legend')[0];
+			legendLayer.style.height = this.get('legendHeightPx')+'px';
+			legendLayer.style.width = width+'px';
 			
+			this.set('legendLayer', legendLayer);
+		}
+		
 		if (titleLayer && title) {
 			titleLayer.innerText = title;
 		}
 		
-		if (layer && titleLayer) {
-			height = frame.height-titleLayer.clientHeight;
-			if (height < 0) height = 0;
-			layer.style.height = height+'px';
-		
-			width = parentLayer.clientWidth;
-			layer.style.width = width+'px';
+		if (this.get('outsideLegend')) {
+			legendOptions = options['legend'];
+			legendOptions['container'] = legendLayer;
 		}
 		
-		if(layer && this.get('isVisibleInWindow')) {
+		height = frame.height-(titleLayer.clientHeight+legendLayer.clientHeight);
+		if (height < 0) height = 0;
+		graphLayer.style.height = height+'px';
+	
+		width = parentLayer.clientWidth;
+		graphLayer.style.width = width+'px';
+		
+		if(graphLayer && this.get('isVisibleInWindow')) {
 			if((width > 0) && (height > 0)) {
 				var data = this.get('data'),
 				series = this.get('series');
 				
 				if (!SC.empty(data)) {
-					Flot.plot(layer, data.toArray(),
-						this.get('options'));
+					Flot.plot(graphLayer, data.toArray(), options);
 					if (this.debugInConsole) console.log('render data');
 				} else if (!SC.empty(series)) {
-					Flot.plot(layer, series.toArray(),
-						this.get('options'));
+					Flot.plot(graphLayer, series.toArray(), options);
 					if (this.debugInConsole) console.log('render series');
 				} else {
 					if (this.debugInConsole) console.warn('data was empty');

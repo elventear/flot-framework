@@ -61,6 +61,10 @@ Flot.GraphView = SC.View.extend(
 			width = frame.width,
 			height, legendOptions;
 		
+		if ( !parentLayer || ! this.get('isVisibleInWindow')) return;
+		if ((frame.width <= 0) || (frame.height <= 0)) return;
+		if ($(parentLayer.width() <= 0 || $(parentLayer.height() <= 0))) return;
+		
 		if (!graphLayer) {
 			graphLayer = this.$('div.flot-graphview-graph')[0];
 			this.set('graphLayer', graphLayer);
@@ -120,31 +124,42 @@ Flot.GraphView = SC.View.extend(
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('data changed');
 	}.observes('.data','.data.[]'),
-	plotOptionsDidChange: function() {
+    
+    plotSeriesDidChange: function() {
+		this.setLayerNeedsUpdate() ;
+		if (this.debugInConsole) console.log('series changed');
+	}.observes('.series','.series.[]'),
+	
+    plotOptionsDidChange: function() {
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('options changed');	
-	}.observes('.options'),
-	visibilityDidChange: function() {
+	}.observes('.options', '.options.[]'),
+	
+    visibilityDidChange: function() {
 		if(this.get('isVisibleInWindow') && this.get('isVisible')) {
 			if (this.debugInConsole) console.log('visibility changed');
 			this.setLayerNeedsUpdate() ;
 		}		
 	}.observes('isVisibleInWindow','isVisible'),
-	layerDidChange: function() {
+	
+    layerDidChange: function() {
 		if (this.debugInConsole) console.log('layerchanged');
 		this.setLayerNeedsUpdate() ;	
 	}.observes('layer'),
-	layoutDidChange: function() {
+	
+    layoutDidChange: function() {
 		sc_super();
 		if (this.debugInConsole) console.log('layout changed');
 		this.setLayerNeedsUpdate() ;
 	},
-	updateLayerLocationIfNeeded: function() {
+	
+    updateLayerLocationIfNeeded: function() {
 		sc_super() ;
 		if (this.debugInConsole) console.log('layer location update');
 		this.setLayerNeedsUpdate() ;
 	},
-	setLayerNeedsUpdate: function() {
+	
+    setLayerNeedsUpdate: function() {
 		this.invokeOnce(function() {
 			this.set('layerNeedsUpdate', YES);
 			if (this.debugInConsole) console.log('need update') ;
@@ -155,7 +170,8 @@ Flot.GraphView = SC.View.extend(
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('view did resize');
 	}.observes('layout'),
-	parentViewDidResize : function() {
+	
+    parentViewDidResize : function() {
 		sc_super();
 		this.setLayerNeedsUpdate();
 		if (this.debugInConsole) console.log('parent did resize');

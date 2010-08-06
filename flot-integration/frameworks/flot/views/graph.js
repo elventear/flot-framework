@@ -125,41 +125,34 @@ Flot.GraphView = SC.View.extend(
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('data changed');
 	}.observes('.data','.data.[]'),
-    
 	plotSeriesDidChange: function() {
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('series changed');
 	}.observes('.series','.series.[]'),
-	
 	plotOptionsDidChange: function() {
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('options changed');	
 	}.observes('.options'),
-	
 	visibilityDidChange: function() {
 		if(this.get('isVisibleInWindow') && this.get('isVisible')) {
 			if (this.debugInConsole) console.log('visibility changed');
 			this.setLayerNeedsUpdate() ;
 		}		
 	}.observes('isVisibleInWindow','isVisible'),
-	
 	layerDidChange: function() {
 		if (this.debugInConsole) console.log('layerchanged');
 		this.setLayerNeedsUpdate() ;	
 	}.observes('layer'),
-	
 	layoutDidChange: function() {
 		sc_super();
 		if (this.debugInConsole) console.log('layout changed');
 		this.setLayerNeedsUpdate() ;
 	},
-	
 	updateLayerLocationIfNeeded: function() {
 		sc_super() ;
 		if (this.debugInConsole) console.log('layer location update');
 		this.setLayerNeedsUpdate() ;
 	},
-	
 	setLayerNeedsUpdate: function() {
 		this.invokeOnce(function() {
 			this.set('layerNeedsUpdate', YES);
@@ -171,11 +164,27 @@ Flot.GraphView = SC.View.extend(
 		this.setLayerNeedsUpdate() ;
 		if (this.debugInConsole) console.log('view did resize');
 	}.observes('layout'),
-	
 	parentViewDidResize : function() {
 		sc_super();
 		this.setLayerNeedsUpdate();
 		if (this.debugInConsole) console.log('parent did resize');
-	}
-
+	},
+	selectionDidChange: function () {
+		var layer = this.get('layer'),
+			isSelected = this.get('isSelected'),
+			className, sel;
+			
+		if (!layer) return;
+		className = layer.className;
+		if (!className) return;
+		
+		sel = layer.className.match('sel');
+		if(isSelected && !sel) {
+			layer.className = className+' sel';
+		} else if (!isSelected && sel) {
+			layer.className = className.replace('sel', '');
+		} else return;
+		this.setLayerNeedsUpdate();
+	}.observes('isSelected')
+	
 });

@@ -85,7 +85,7 @@ Flot.GraphView = SC.View.extend(
 		}
 		
 		if (titleLayer && title) {
-			titleLayer.innerText = title;
+			titleLayer.innerHTML = title;
 		}
 		
 		if (this.get('outsideLegend')) {

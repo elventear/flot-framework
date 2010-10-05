@@ -19,6 +19,7 @@ Flot.GraphView = SC.View.extend(
 	options: null,
 	title: null,
 	debugInConsole: true,
+	parentLayer: null,
 	titleLayer: null,
 	graphLayer: null,
 	legendLayer: null,
@@ -43,10 +44,14 @@ Flot.GraphView = SC.View.extend(
 			
 	},
 	render: function(context, firstTime) {
+		var frame = this.get('frame');
+		
 		context.
+			begin().addClass('flot-graphview').
 			begin().addClass('flot-graphview-title').end().
 			begin().addClass('flot-graphview-graph').end().
-			begin().addClass('flot-graphview-legend').end();
+			begin().addClass('flot-graphview-legend').end()
+			.end();
 		this.set('layerNeedsUpdate', YES);
 		sc_super();
 	},
@@ -56,15 +61,22 @@ Flot.GraphView = SC.View.extend(
 			graphLayer = this.get('graphLayer'), 
 			titleLayer = this.get('titleLayer'),
 			legendLayer = this.get('legendLayer'),
-			parentLayer = this.get('layer'),
+			parentLayer = this.get('parentLayer'),
 			options = this.get('options'),
 			width = frame.width,
 			height, legendOptions;
 		
 		
-		if ( !parentLayer || ! this.get('isVisibleInWindow')) return;
+		if ( !this.get('layer') || ! this.get('isVisibleInWindow')) return;
 		if ((frame.width <= 0) || (frame.height <= 0)) return;
 		
+		width = 0.95*width;
+		
+		if (!parentLayer) {
+			parentLayer = this.$('div.flot-graphview')[0];
+			this.set('parentLayer', parentLayer);
+		}
+		parentLayer.style.width = width+'px';
 		
 		if (!graphLayer) {
 			graphLayer = this.$('div.flot-graphview-graph')[0];
@@ -78,11 +90,10 @@ Flot.GraphView = SC.View.extend(
 		
 		if (!legendLayer) {
 			legendLayer = this.$('div.flot-graphview-legend')[0];
-			legendLayer.style.height = this.get('legendHeightPx')+'px';
-			legendLayer.style.width = width+'px';
-			
 			this.set('legendLayer', legendLayer);
 		}
+		legendLayer.style.height = this.get('legendHeightPx')+'px';
+		legendLayer.style.width = width+'px';
 		
 		if (titleLayer && title) {
 			titleLayer.innerHTML = title;

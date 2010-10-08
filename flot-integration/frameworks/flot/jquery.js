@@ -1,1 +1,0 @@
-../../../dependencies/jquery-1.4.2/jquery.js

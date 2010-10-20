@@ -44,13 +44,14 @@ Flot.GraphView = SC.View.extend(
 			
 	},
 	render: function(context, firstTime) {
-		var frame = this.get('frame');
+		var frame = this.get('frame'),
+		    myHash = SC.hashFor(this);
 		
 		context.
-			begin().addClass('flot-graphview').
-			begin().addClass('flot-graphview-title').end().
-			begin().addClass('flot-graphview-graph').end().
-			begin().addClass('flot-graphview-legend').end()
+			begin().addClass('flot-graphview').id(myHash).
+			begin().addClass('flot-graphview-title').id(myHash+'-1').end().
+			begin().addClass('flot-graphview-graph').id(myHash+'-2').end().
+			begin().addClass('flot-graphview-legend').id(myHash+'-3').end()
 			.end();
 		this.set('layerNeedsUpdate', YES);
 		sc_super();
